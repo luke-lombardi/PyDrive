@@ -6,7 +6,7 @@ try:
 except ImportError:
     from yaml import Loader
 
-SETTINGS_FILE = "settings.yaml"
+SETTINGS_FILE = ".slai/gauth/settings.yml"
 SETTINGS_STRUCT = {
     "client_config_backend": {
         "type": str,
@@ -28,7 +28,7 @@ SETTINGS_STRUCT = {
     "client_config_file": {
         "type": str,
         "required": False,
-        "default": "client_secrets.json",
+        "default": ".slai/gauth/client_secrets.json",
     },
     "save_credentials_backend": {
         "type": str,

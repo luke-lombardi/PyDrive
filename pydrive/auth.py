@@ -149,7 +149,7 @@ class GoogleAuth(ApiAttributeMixin, object):
 
     DEFAULT_SETTINGS = {
         "client_config_backend": "file",
-        "client_config_file": "client_secrets.json",
+        "client_config_file": ".slai/gauth/client_secrets.json",
         "save_credentials": False,
         "oauth_scope": ["https://www.googleapis.com/auth/drive"],
     }
@@ -174,7 +174,7 @@ class GoogleAuth(ApiAttributeMixin, object):
     service = ApiAttribute("service")
     auth_method = ApiAttribute("auth_method")
 
-    def __init__(self, settings_file="settings.yaml", http_timeout=None):
+    def __init__(self, settings_file=".slai/gauth/settings.yml", http_timeout=None):
         """Create an instance of GoogleAuth.
 
         This constructor just sets the path of settings file.
