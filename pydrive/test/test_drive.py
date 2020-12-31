@@ -6,10 +6,9 @@ from pydrive.drive import GoogleDrive
 
 
 class GoogleDriveTest(unittest.TestCase):
-    """Tests basic operations on meta-data information of the linked Google Drive account.
-    """
+    """Tests basic operations on meta-data information of the linked Google Drive account."""
 
-    ga = GoogleAuth('settings/test1.yaml')
+    ga = GoogleAuth("settings/test1.yaml")
     ga.LocalWebserverAuth()
 
     def test_01_About_Request(self):
@@ -19,5 +18,5 @@ class GoogleDriveTest(unittest.TestCase):
         self.assertTrue(about_object is not None, "About object not loading.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

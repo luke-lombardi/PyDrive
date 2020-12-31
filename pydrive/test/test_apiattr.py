@@ -3,13 +3,14 @@ import unittest
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
+
 class ApiAttributeTest(unittest.TestCase):
-    """Test ApiAttr functions.
-    """
-    ga = GoogleAuth('settings/test1.yaml')
+    """Test ApiAttr functions."""
+
+    ga = GoogleAuth("settings/test1.yaml")
     ga.LocalWebserverAuth()
-    first_file = 'a.png'
-    second_file = 'b.png'
+    first_file = "a.png"
+    second_file = "b.png"
 
     def test_UpdateMetadataNotInfinitelyNesting(self):
         # Verify 'metadata' field present.
@@ -20,7 +21,7 @@ class ApiAttributeTest(unittest.TestCase):
         # Verify 'metadata' field still present.
         self.assertTrue(self.file1.metadata is not None)
         # Ensure no 'metadata' field in 'metadata' (i.e. nested).
-        self.assertTrue('metadata' not in self.file1.metadata)
+        self.assertTrue("metadata" not in self.file1.metadata)
 
     def setUp(self):
         self.drive = GoogleDrive(self.ga)
@@ -30,5 +31,6 @@ class ApiAttributeTest(unittest.TestCase):
     def tearDown(self):
         self.file1.Delete()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

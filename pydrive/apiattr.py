@@ -1,181 +1,185 @@
 from six import Iterator, iteritems
 
+
 class ApiAttribute(object):
-  """A data descriptor that sets and returns values."""
+    """A data descriptor that sets and returns values."""
 
-  def __init__(self, name):
-    """Create an instance of ApiAttribute.
+    def __init__(self, name):
+        """Create an instance of ApiAttribute.
 
-    :param name: name of this attribute.
-    :type name: str.
-    """
-    self.name = name
+        :param name: name of this attribute.
+        :type name: str.
+        """
+        self.name = name
 
-  def __get__(self, obj, type=None):
-    """Accesses value of this attribute."""
-    return obj.attr.get(self.name)
+    def __get__(self, obj, type=None):
+        """Accesses value of this attribute."""
+        return obj.attr.get(self.name)
 
-  def __set__(self, obj, value):
-    """Write value of this attribute."""
-    obj.attr[self.name] = value
-    if obj.dirty.get(self.name) is not None:
-      obj.dirty[self.name] = True
+    def __set__(self, obj, value):
+        """Write value of this attribute."""
+        obj.attr[self.name] = value
+        if obj.dirty.get(self.name) is not None:
+            obj.dirty[self.name] = True
 
-  def __del__(self, obj=None):
-    """Delete value of this attribute."""
-    if not obj:
-      return
+    def __del__(self, obj=None):
+        """Delete value of this attribute."""
+        if not obj:
+            return
 
-    del obj.attr[self.name]
-    if obj.dirty.get(self.name) is not None:
-      del obj.dirty[self.name]
+        del obj.attr[self.name]
+        if obj.dirty.get(self.name) is not None:
+            del obj.dirty[self.name]
+
 
 class ApiAttributeMixin(object):
-  """Mixin to initialize required global variables to use ApiAttribute."""
+    """Mixin to initialize required global variables to use ApiAttribute."""
 
-  def __init__(self):
-    self.attr = {}
-    self.dirty = {}
-    self.http = None  # Any element may make requests and will require this
-    # field.
+    def __init__(self):
+        self.attr = {}
+        self.dirty = {}
+        self.http = None  # Any element may make requests and will require this
+        # field.
 
 
 class ApiResource(dict):
-  """Super class of all api resources.
+    """Super class of all api resources.
 
-  Inherits and behaves as a python dictionary to handle api resources.
-  Save clean copy of metadata in self.metadata as a dictionary.
-  Provides changed metadata elements to efficiently update api resources.
-  """
-  auth = ApiAttribute('auth')
-
-  def __init__(self, *args, **kwargs):
-    """Create an instance of ApiResource."""
-    super(ApiResource, self).__init__()
-    self.update(*args, **kwargs)
-    self.metadata = dict(self)
-
-  def __getitem__(self, key):
-    """Overwritten method of dictionary.
-
-    :param key: key of the query.
-    :type key: str.
-    :returns: value of the query.
+    Inherits and behaves as a python dictionary to handle api resources.
+    Save clean copy of metadata in self.metadata as a dictionary.
+    Provides changed metadata elements to efficiently update api resources.
     """
-    return dict.__getitem__(self, key)
 
-  def __setitem__(self, key, val):
-    """Overwritten method of dictionary.
+    auth = ApiAttribute("auth")
 
-    :param key: key of the query.
-    :type key: str.
-    :param val: value of the query.
-    """
-    dict.__setitem__(self, key, val)
+    def __init__(self, *args, **kwargs):
+        """Create an instance of ApiResource."""
+        super(ApiResource, self).__init__()
+        self.update(*args, **kwargs)
+        self.metadata = dict(self)
 
-  def __repr__(self):
-    """Overwritten method of dictionary."""
-    dict_representation = dict.__repr__(self)
-    return '%s(%s)' % (type(self).__name__, dict_representation)
+    def __getitem__(self, key):
+        """Overwritten method of dictionary.
 
-  def update(self, *args, **kwargs):
-    """Overwritten method of dictionary."""
-    for k, v in iteritems(dict(*args, **kwargs)):
-      self[k] = v
+        :param key: key of the query.
+        :type key: str.
+        :returns: value of the query.
+        """
+        return dict.__getitem__(self, key)
 
-  def UpdateMetadata(self, metadata=None):
-    """Update metadata and mark all of them to be clean."""
-    if metadata:
-      self.update(metadata)
-    self.metadata = dict(self)
+    def __setitem__(self, key, val):
+        """Overwritten method of dictionary.
 
-  def GetChanges(self):
-    """Returns changed metadata elements to update api resources efficiently.
+        :param key: key of the query.
+        :type key: str.
+        :param val: value of the query.
+        """
+        dict.__setitem__(self, key, val)
 
-    :returns: dict -- changed metadata elements.
-    """
-    dirty = {}
-    for key in self:
-      if self.metadata.get(key) is None:
-        dirty[key] = self[key]
-      elif self.metadata[key] != self[key]:
-        dirty[key] = self[key]
-    return dirty
+    def __repr__(self):
+        """Overwritten method of dictionary."""
+        dict_representation = dict.__repr__(self)
+        return "%s(%s)" % (type(self).__name__, dict_representation)
+
+    def update(self, *args, **kwargs):
+        """Overwritten method of dictionary."""
+        for k, v in iteritems(dict(*args, **kwargs)):
+            self[k] = v
+
+    def UpdateMetadata(self, metadata=None):
+        """Update metadata and mark all of them to be clean."""
+        if metadata:
+            self.update(metadata)
+        self.metadata = dict(self)
+
+    def GetChanges(self):
+        """Returns changed metadata elements to update api resources efficiently.
+
+        :returns: dict -- changed metadata elements.
+        """
+        dirty = {}
+        for key in self:
+            if self.metadata.get(key) is None:
+                dirty[key] = self[key]
+            elif self.metadata[key] != self[key]:
+                dirty[key] = self[key]
+        return dirty
 
 
 class ApiResourceList(ApiAttributeMixin, ApiResource, Iterator):
-  """Abstract class of all api list resources.
+    """Abstract class of all api list resources.
 
-  Inherits ApiResource and builds iterator to list any API resource.
-  """
-  metadata = ApiAttribute('metadata')
-
-  def __init__(self, auth=None, metadata=None):
-    """Create an instance of ApiResourceList.
-
-    :param auth: authorized GoogleAuth instance.
-    :type auth: GoogleAuth.
-    :param metadata: parameter to send to list command.
-    :type metadata: dict.
+    Inherits ApiResource and builds iterator to list any API resource.
     """
-    ApiAttributeMixin.__init__(self)
-    ApiResource.__init__(self)
-    self.auth = auth
-    self.UpdateMetadata()
-    if metadata:
-      self.update(metadata)
 
-  def __iter__(self):
-    """Returns iterator object.
+    metadata = ApiAttribute("metadata")
 
-    :returns: ApiResourceList -- self
-    """
-    return self
+    def __init__(self, auth=None, metadata=None):
+        """Create an instance of ApiResourceList.
 
-  def __next__(self):
-    """Make API call to list resources and return them.
+        :param auth: authorized GoogleAuth instance.
+        :type auth: GoogleAuth.
+        :param metadata: parameter to send to list command.
+        :type metadata: dict.
+        """
+        ApiAttributeMixin.__init__(self)
+        ApiResource.__init__(self)
+        self.auth = auth
+        self.UpdateMetadata()
+        if metadata:
+            self.update(metadata)
 
-    Auto updates 'pageToken' every time it makes API call and
-    raises StopIteration when it reached the end of iteration.
+    def __iter__(self):
+        """Returns iterator object.
 
-    :returns: list -- list of API resources.
-    :raises: StopIteration
-    """
-    if 'pageToken' in self and self['pageToken'] is None:
-      raise StopIteration
-    result = self._GetList()
-    self['pageToken'] = self.metadata.get('nextPageToken')
-    return result
+        :returns: ApiResourceList -- self
+        """
+        return self
 
-  def GetList(self):
-    """Get list of API resources.
+    def __next__(self):
+        """Make API call to list resources and return them.
 
-    If 'maxResults' is not specified, it will automatically iterate through
-    every resources available. Otherwise, it will make API call once and
-    update 'pageToken'.
+        Auto updates 'pageToken' every time it makes API call and
+        raises StopIteration when it reached the end of iteration.
 
-    :returns: list -- list of API resources.
-    """
-    if self.get('maxResults') is None:
-      self['maxResults'] = 1000
-      result = []
-      for x in self:
-        result.extend(x)
-      del self['maxResults']
-      return result
-    else:
-      return next(self)
+        :returns: list -- list of API resources.
+        :raises: StopIteration
+        """
+        if "pageToken" in self and self["pageToken"] is None:
+            raise StopIteration
+        result = self._GetList()
+        self["pageToken"] = self.metadata.get("nextPageToken")
+        return result
 
-  def _GetList(self):
-    """Helper function which actually makes API call.
+    def GetList(self):
+        """Get list of API resources.
 
-    Should be overwritten.
+        If 'maxResults' is not specified, it will automatically iterate through
+        every resources available. Otherwise, it will make API call once and
+        update 'pageToken'.
 
-    :raises: NotImplementedError
-    """
-    raise NotImplementedError
+        :returns: list -- list of API resources.
+        """
+        if self.get("maxResults") is None:
+            self["maxResults"] = 1000
+            result = []
+            for x in self:
+                result.extend(x)
+            del self["maxResults"]
+            return result
+        else:
+            return next(self)
 
-  def Reset(self):
-    """Resets current iteration"""
-    if 'pageToken' in self:
-      del self['pageToken']
+    def _GetList(self):
+        """Helper function which actually makes API call.
+
+        Should be overwritten.
+
+        :raises: NotImplementedError
+        """
+        raise NotImplementedError
+
+    def Reset(self):
+        """Resets current iteration"""
+        if "pageToken" in self:
+            del self["pageToken"]

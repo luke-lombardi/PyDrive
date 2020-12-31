@@ -1,7 +1,7 @@
 import random
 import re
 
-newline_pattern = re.compile(r'[\r\n]')
+newline_pattern = re.compile(r"[\r\n]")
 
 
 def CreateRandomFileName():
