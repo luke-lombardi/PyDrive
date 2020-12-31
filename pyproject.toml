@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.6"
 google-api-python-client = "1.2"
 oauth2client = "4.0.0"
-PyYAML = "3.0"
+pyyaml = "^3.0"
 
 [tool.poetry.dev-dependencies]
 flake8-black = "^0.2.1"
